@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8
+    container_name: form_db
+    environment:
+      MYSQL_ROOT_PASSWORD: newpassword
+      MYSQL_DATABASE: form_back
+    volumes:
+      - ./db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  web:
+    build: .  # Использует Dockerfile из текущей папки
+    container_name: form_web
+    ports:
+      - "8081:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
